@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SpendWise personal expense tracker" />
+  <title>SpendWise — Personal Expense Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="SpendWise home"><span class="brand-mark">S</span><span>Spend<span class="brand-accent">Wise</span></span></a>
+      <div class="topbar-actions">
+        <button class="icon-button" id="themeToggle" type="button" aria-label="Switch to light mode" title="Toggle theme">☼</button>
+        <button class="button button-primary" id="addTransactionTop" type="button"><span>＋</span> Add transaction</button>
+      </div>
+    </header>
+
+    <main id="top" class="page-content">
+      <section class="hero-row">
+        <div><p class="eyebrow">PERSONAL FINANCE / <span id="currentMonthLabel"></span></p><h1>Make every dollar <span>count.</span></h1><p class="hero-copy">A clearer view of your money, built for better decisions.</p></div>
+        <div class="hero-date"><span class="status-dot"></span><span id="todayLabel"></span></div>
+      </section>
+
+      <section class="metric-grid" aria-label="Financial overview">
+        <article class="metric-card balance-card"><div class="metric-icon">◈</div><div class="metric-label">Total balance</div><div class="metric-value" id="totalBalance">$0.00</div><div class="metric-note" id="balanceNote">Across all transactions</div></article>
+        <article class="metric-card"><div class="metric-icon income-icon">↗</div><div class="metric-label">Monthly income</div><div class="metric-value" id="monthlyIncome">$0.00</div><div class="metric-note positive" id="incomeNote">This month</div></article>
+        <article class="metric-card"><div class="metric-icon expense-icon">↘</div><div class="metric-label">Monthly expenses</div><div class="metric-value" id="monthlyExpenses">$0.00</div><div class="metric-note" id="expenseNote">This month</div></article>
+        <article class="metric-card"><div class="metric-icon savings-icon">✦</div><div class="metric-label">Monthly savings</div><div class="metric-value" id="monthlySavings">$0.00</div><div class="metric-note" id="savingsNote">Income minus expenses</div></article>
+      </section>
+
+      <section class="chart-grid">
+        <article class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">ANALYSIS</p><h2>Spending by category</h2></div><span class="period-pill" id="categoryPeriod">This month</span></div><div class="chart-wrap doughnut-wrap"><canvas id="categoryChart" aria-label="Spending by category chart"></canvas><div class="chart-empty" id="categoryEmpty">No expense data yet</div></div><div class="legend" id="categoryLegend"></div></article>
+        <article class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">CASH FLOW</p><h2>Monthly spending</h2></div><span class="period-pill">Last 6 months</span></div><div class="chart-wrap"><canvas id="monthlyChart" aria-label="Monthly spending chart"></canvas><div class="chart-empty" id="monthlyEmpty">Add transactions to see trends</div></div></article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel transactions-panel"><div class="panel-heading"><div><p class="eyebrow">ACTIVITY</p><h2>Transactions</h2></div><button class="text-button" id="exportCsv" type="button">Export CSV <span>↓</span></button></div><div class="filters"><label class="search-field"><span>⌕</span><input id="searchInput" type="search" placeholder="Search transactions..." aria-label="Search transactions"></label><select id="typeFilter" aria-label="Filter by type"><option value="all">All types</option><option value="income">Income</option><option value="expense">Expenses</option></select><select id="categoryFilter" aria-label="Filter by category"><option value="all">All categories</option></select><select id="sortSelect" aria-label="Sort transactions"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="highest">Highest amount</option><option value="lowest">Lowest amount</option></select></div><div class="transaction-list" id="transactionList"></div><div class="list-footer"><span id="transactionCount">0 transactions</span><button class="button button-secondary" id="clearFilters" type="button">Clear filters</button></div></article>
+        <aside class="panel budgets-panel"><div class="panel-heading"><div><p class="eyebrow">PLANNING</p><h2>Monthly budgets</h2></div><button class="icon-button small" id="addBudget" type="button" aria-label="Add budget">＋</button></div><div class="budget-month"><button id="previousBudgetMonth" type="button" aria-label="Previous month">‹</button><strong id="budgetMonthLabel"></strong><button id="nextBudgetMonth" type="button" aria-label="Next month">›</button></div><div id="budgetList" class="budget-list"></div><div class="budget-total"><div><span>Total planned</span><strong id="totalBudget">$0.00</strong></div><div><span>Total spent</span><strong id="totalBudgetSpent">$0.00</strong></div></div></aside>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="transactionModal" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="transactionModalTitle"><div class="modal-header"><div><p class="eyebrow">ACTIVITY</p><h2 id="transactionModalTitle">Add transaction</h2></div><button class="icon-button" data-close-modal="transactionModal" type="button" aria-label="Close">×</button></div><form id="transactionForm" novalidate><input type="hidden" id="transactionId"><div class="form-grid"><label>Type<select id="transactionType" required><option value="expense">Expense</option><option value="income">Income</option></select></label><label>Amount<input id="transactionAmount" type="number" min="0.01" step="0.01" placeholder="0.00" required></label><label>Category<select id="transactionCategory" required></select></label><label>Date<input id="transactionDate" type="date" required></label><label class="full-width">Description<input id="transactionDescription" type="text" maxlength="80" placeholder="What was this for?" required></label></div><p class="form-error" id="transactionError" role="alert"></p><div class="modal-actions"><button class="button button-secondary" data-close-modal="transactionModal" type="button">Cancel</button><button class="button button-primary" type="submit">Save transaction</button></div></form></div></div>
+  <div class="modal-backdrop" id="budgetModal" hidden><div class="modal compact-modal" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle"><div class="modal-header"><div><p class="eyebrow">PLANNING</p><h2 id="budgetModalTitle">Set a budget</h2></div><button class="icon-button" data-close-modal="budgetModal" type="button" aria-label="Close">×</button></div><form id="budgetForm" novalidate><label>Category<select id="budgetCategory" required></select></label><label>Monthly limit<input id="budgetAmount" type="number" min="0.01" step="0.01" placeholder="0.00" required></label><p class="form-error" id="budgetError" role="alert"></p><div class="modal-actions"><button class="button button-secondary" data-close-modal="budgetModal" type="button">Cancel</button><button class="button button-primary" type="submit">Save budget</button></div></form></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
